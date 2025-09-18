@@ -24,11 +24,11 @@ Developed an interactive UI using HTML, CSS, and JavaScript
 Users can input details like square footage, BHK, and location to get a predicted price in real-time
 
 
-🚀 Tech Stack
+🚀 Tech Stack: 
 Machine Learning: Python, Scikit-learn, Pandas, NumPy |
 Backend: Flask |
 Frontend: HTML, CSS, JavaScript
 
-🎯 Outcome
+🎯 Outcome:
 An end-to-end ML pipeline and deployed web application that predicts house prices in Bangalore with an easy-to-use interface.
 <img width="917" height="612" alt="Real Estate Price Prediction" src="https://github.com/user-attachments/assets/e9b25af8-0d06-4e55-b903-ea19b9542aeb" />
