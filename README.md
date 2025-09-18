@@ -25,8 +25,8 @@ Users can input details like square footage, BHK, and location to get a predicte
 
 
 🚀 Tech Stack
-Machine Learning: Python, Scikit-learn, Pandas, NumPy
-Backend: Flask
+Machine Learning: Python, Scikit-learn, Pandas, NumPy |
+Backend: Flask |
 Frontend: HTML, CSS, JavaScript
 
 🎯 Outcome
