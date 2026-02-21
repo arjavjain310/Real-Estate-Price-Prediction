@@ -1,9 +1,14 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
+import os
 from flask_cors import CORS
 import util
 
 app = Flask(__name__)
 CORS(app)  # allow requests from client folder
+
+# Path to client folder (parent of server)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CLIENT_DIR = os.path.join(BASE_DIR, "client")
 
 
 @app.route('/get_location_names', methods=['GET'])
@@ -58,11 +63,21 @@ def health_check():
     return jsonify({'status': 'healthy', 'model_loaded': util.get_location_names() is not None})
 
 
+@app.route('/')
+def index():
+    return send_from_directory(CLIENT_DIR, 'app.html')
+
+
+@app.route('/<path:filename>')
+def client_static(filename):
+    return send_from_directory(CLIENT_DIR, filename)
+
+
 if __name__ == '__main__':
     print("Starting Flask Server For Home Price Prediction...")
     if util.load_saved_artifacts():
         print("Server is ready to accept requests")
-        print("Access the application at: http://localhost:5000")
-        app.run(host='0.0.0.0', port=5000, debug=True)
+        print("Access the application at: http://localhost:5001")
+        app.run(host='0.0.0.0', port=5001, debug=True)
     else:
         print("Failed to load artifacts. Server cannot start.")

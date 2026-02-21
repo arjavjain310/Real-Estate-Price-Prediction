@@ -2,73 +2,127 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>🏠 Bangalore Real Estate Price Prediction</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Real Estate Price Prediction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="app.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>🏠 Bangalore Real Estate Price Prediction</h1>
-
-    <div class="form-group">
-      <label for="uiSqft">Area (Square Feet)</label>
-      <input type="number" id="uiSqft" placeholder="Enter area in square feet" value="1000" min="100" max="10000">
+  <header class="dashboard-header">
+    <div class="header-inner">
+      <h1 class="site-title"><span class="title-accent">Real Estate</span> Price Prediction</h1>
+      <span class="site-subtitle" id="locationCount">Bangalore · <span id="locationCountNum">—</span> locations</span>
     </div>
+  </header>
 
-    <div class="form-group">
-      <label>BHK</label>
-      <div class="switch-field">
-        <input type="radio" id="bhk1" name="uiBHK" value="1">
-        <label for="bhk1">1</label>
-        
-        <input type="radio" id="bhk2" name="uiBHK" value="2" checked>
-        <label for="bhk2">2</label>
-        
-        <input type="radio" id="bhk3" name="uiBHK" value="3">
-        <label for="bhk3">3</label>
-        
-        <input type="radio" id="bhk4" name="uiBHK" value="4">
-        <label for="bhk4">4</label>
-        
-        <input type="radio" id="bhk5" name="uiBHK" value="5">
-        <label for="bhk5">5</label>
+  <main class="dashboard-main">
+
+    <div class="dashboard-grid">
+      <aside class="dashboard-sidebar">
+        <div class="card card-form">
+          <h2 class="card-title">Property details</h2>
+
+          <div class="form-group">
+            <label for="uiSqft">Area (sq ft)</label>
+            <div class="input-wrap">
+              <input type="number" id="uiSqft" placeholder="Enter area (sq ft)" min="1" step="1" inputmode="numeric">
+              <span class="input-suffix">sq ft</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>BHK</label>
+            <div class="switch-field">
+              <input type="radio" id="bhk1" name="uiBHK" value="1">
+              <label for="bhk1">1</label>
+              <input type="radio" id="bhk2" name="uiBHK" value="2" checked>
+              <label for="bhk2">2</label>
+              <input type="radio" id="bhk3" name="uiBHK" value="3">
+              <label for="bhk3">3</label>
+              <input type="radio" id="bhk4" name="uiBHK" value="4">
+              <label for="bhk4">4</label>
+              <input type="radio" id="bhk5" name="uiBHK" value="5">
+              <label for="bhk5">5</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Bathrooms</label>
+            <div class="switch-field">
+              <input type="radio" id="bath1" name="uiBathrooms" value="1">
+              <label for="bath1">1</label>
+              <input type="radio" id="bath2" name="uiBathrooms" value="2" checked>
+              <label for="bath2">2</label>
+              <input type="radio" id="bath3" name="uiBathrooms" value="3">
+              <label for="bath3">3</label>
+              <input type="radio" id="bath4" name="uiBathrooms" value="4">
+              <label for="bath4">4</label>
+              <input type="radio" id="bath5" name="uiBathrooms" value="5">
+              <label for="bath5">5</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="uiLocations">Location</label>
+            <select id="uiLocations">
+              <option value="" disabled selected>Select area</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn-primary" onclick="onClickedEstimatePrice()" id="btnEstimate">
+            <span class="btn-text">Estimate price</span>
+            <span class="btn-icon">→</span>
+          </button>
+
+          <div id="loading" class="loading" aria-hidden="true">
+            <span class="spinner"></span>
+            <span>Calculating...</span>
+          </div>
+          <div id="errorMessage" class="error-message" role="alert"></div>
+        </div>
+      </aside>
+
+      <div class="dashboard-content">
+        <div class="stats-row">
+          <div class="stat-card">
+            <span class="stat-value" id="statLocations">240+</span>
+            <span class="stat-label">Locations</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">₹ Lakh</span>
+            <span class="stat-label">Price in lakhs</span>
+          </div>
+        </div>
+
+        <div class="card card-result" id="resultCard">
+          <div class="result-placeholder" id="resultPlaceholder">
+            <span class="result-placeholder-icon">◇</span>
+            <p>Your estimated price will appear here.</p>
+            <p class="result-placeholder-hint">Fill the form and click <strong>Estimate price</strong>.</p>
+          </div>
+          <div class="result-content" id="resultContent" hidden>
+            <div class="result-badge">Estimated value</div>
+            <div class="result-price" id="resultPrice">—</div>
+            <div class="result-details" id="resultDetails"></div>
+          </div>
+        </div>
+
+        <div class="card card-recent">
+          <h2 class="card-title">Recent estimates</h2>
+          <ul class="recent-list" id="recentList">
+            <li class="recent-empty" id="recentEmpty">No estimates yet.</li>
+          </ul>
+        </div>
       </div>
     </div>
+  </main>
 
-    <div class="form-group">
-      <label>Bathrooms</label>
-      <div class="switch-field">
-        <input type="radio" id="bath1" name="uiBathrooms" value="1">
-        <label for="bath1">1</label>
-        
-        <input type="radio" id="bath2" name="uiBathrooms" value="2" checked>
-        <label for="bath2">2</label>
-        
-        <input type="radio" id="bath3" name="uiBathrooms" value="3">
-        <label for="bath3">3</label>
-        
-        <input type="radio" id="bath4" name="uiBathrooms" value="4">
-        <label for="bath4">4</label>
-        
-        <input type="radio" id="bath5" name="uiBathrooms" value="5">
-        <label for="bath5">5</label>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="uiLocations">Location</label>
-      <select id="uiLocations">
-        <option value="" disabled selected>Choose a Location</option>
-      </select>
-    </div>
-
-    <button onclick="onClickedEstimatePrice()">Estimate Price</button>
-    
-    <div id="loading" class="loading">Calculating price...</div>
-    
-    <div id="uiEstimatedPrice" class="result"></div>
-    <div id="errorMessage" class="error"></div>
-  </div>
+  <footer class="dashboard-footer">
+    <p>Bangalore Real Estate Price Prediction · ML-powered estimates · For reference only</p>
+  </footer>
 
   <script src="app.js"></script>
 </body>

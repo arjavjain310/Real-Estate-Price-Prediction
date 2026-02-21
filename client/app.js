@@ -1,68 +1,148 @@
-// Get selected BHK value
+var API_BASE = "http://127.0.0.1:5001";
+var RECENT_KEY = "pricePredictRecent";
+var RECENT_MAX = 8;
+
+// ----- Recent estimates (sessionStorage) -----
+function getRecent() {
+  try {
+    var raw = sessionStorage.getItem(RECENT_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+function addRecent(entry) {
+  var list = getRecent();
+  list.unshift(entry);
+  list = list.slice(0, RECENT_MAX);
+  try {
+    sessionStorage.setItem(RECENT_KEY, JSON.stringify(list));
+  } catch (e) {}
+  renderRecent();
+}
+function renderRecent() {
+  var list = getRecent();
+  var container = document.getElementById("recentList");
+  var empty = document.getElementById("recentEmpty");
+  if (!container) return;
+
+  if (list.length === 0) {
+    if (empty) empty.style.display = "block";
+    container.querySelectorAll(".recent-item").forEach(function (el) { el.remove(); });
+    return;
+  }
+  if (empty) empty.style.display = "none";
+  container.querySelectorAll(".recent-item").forEach(function (el) { el.remove(); });
+  list.forEach(function (entry) {
+    var li = document.createElement("li");
+    li.className = "recent-item";
+    li.innerHTML =
+      "<span class=\"recent-item-info\">" +
+      escapeHtml(entry.sqft) + " sqft, " + entry.bhk + " BHK · " + escapeHtml(entry.location) +
+      "</span><span class=\"recent-item-price\">₹ " + entry.price + " Lakh</span>";
+    container.appendChild(li);
+  });
+}
+function escapeHtml(s) {
+  var div = document.createElement("div");
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+// ----- Result panel -----
+function showResult(price, sqft, bhk, bath, location) {
+  var placeholder = document.getElementById("resultPlaceholder");
+  var content = document.getElementById("resultContent");
+  var priceEl = document.getElementById("resultPrice");
+  var detailsEl = document.getElementById("resultDetails");
+  if (placeholder) placeholder.style.display = "none";
+  if (content) {
+    content.hidden = false;
+    content.style.display = "block";
+  }
+  if (priceEl) priceEl.textContent = "₹ " + price + " Lakh";
+  if (detailsEl) {
+    detailsEl.textContent = sqft + " sq ft · " + bhk + " BHK · " + bath + " bath · " + location;
+  }
+}
+function showResultPlaceholder() {
+  var placeholder = document.getElementById("resultPlaceholder");
+  var content = document.getElementById("resultContent");
+  if (placeholder) placeholder.style.display = "block";
+  if (content) {
+    content.hidden = true;
+    content.style.display = "none";
+  }
+}
+function showError(message) {
+  var el = document.getElementById("errorMessage");
+  if (el) {
+    el.textContent = message;
+    el.style.display = "block";
+  }
+}
+function hideError() {
+  var el = document.getElementById("errorMessage");
+  if (el) {
+    el.textContent = "";
+    el.style.display = "none";
+  }
+}
+
+// ----- BHK / Bath -----
 function getBHKValue() {
-  var uiBHK = document.getElementsByName("uiBHK");
-  for (var i = 0; i < uiBHK.length; i++) {
-    if (uiBHK[i].checked) {
-      return parseInt(uiBHK[i].value);
-    }
+  var radios = document.getElementsByName("uiBHK");
+  for (var i = 0; i < radios.length; i++) {
+    if (radios[i].checked) return parseInt(radios[i].value, 10);
   }
   return -1;
 }
-
-// Get selected bathroom value
 function getBathValue() {
-  var uiBathrooms = document.getElementsByName("uiBathrooms");
-  for (var i = 0; i < uiBathrooms.length; i++) {
-    if (uiBathrooms[i].checked) {
-      return parseInt(uiBathrooms[i].value);
-    }
+  var radios = document.getElementsByName("uiBathrooms");
+  for (var i = 0; i < radios.length; i++) {
+    if (radios[i].checked) return parseInt(radios[i].value, 10);
   }
   return -1;
 }
 
-// Estimate price button click handler
+// ----- Estimate price -----
 function onClickedEstimatePrice() {
-  console.log("Estimate price button clicked");
-
   var sqft = document.getElementById("uiSqft").value;
   var bhk = getBHKValue();
   var bathrooms = getBathValue();
   var location = document.getElementById("uiLocations").value;
-  var estPrice = document.getElementById("uiEstimatedPrice");
-  var errorDiv = document.getElementById("errorMessage");
   var loadingDiv = document.getElementById("loading");
+  var btn = document.getElementById("btnEstimate");
 
-  // Reset previous messages
-  estPrice.innerHTML = "";
-  errorDiv.style.display = "none";
-  
-  // Validate inputs
-  if (!sqft || sqft <= 0) {
-    showError("Please enter a valid area value");
+  hideError();
+  showResultPlaceholder();
+
+  var sqftNum = parseFloat(sqft);
+  if (sqft === "" || isNaN(sqftNum) || sqftNum < 1) {
+    showError("Please enter a valid area (sq ft) — any positive number.");
     return;
   }
-  
   if (bhk === -1) {
-    showError("Please select BHK value");
+    showError("Please select BHK.");
     return;
   }
-  
   if (bathrooms === -1) {
-    showError("Please select bathroom value");
+    showError("Please select bathrooms.");
     return;
   }
-  
   if (!location) {
-    showError("Please select a location");
+    showError("Please select a location.");
     return;
   }
 
-  // Show loading indicator
-  loadingDiv.style.display = "block";
-  
-  // Make API request
+  if (loadingDiv) {
+    loadingDiv.setAttribute("aria-hidden", "false");
+    loadingDiv.style.display = "flex";
+  }
+  if (btn) btn.disabled = true;
+
   $.ajax({
-    url: "http://127.0.0.1:5000/predict_home_price",
+    url: API_BASE + "/predict_home_price",
     type: "POST",
     contentType: "application/json",
     data: JSON.stringify({
@@ -71,81 +151,73 @@ function onClickedEstimatePrice() {
       bath: bathrooms,
       location: location
     }),
-    success: function(data, status) {
-      loadingDiv.style.display = "none";
-      
+    success: function (data) {
+      if (loadingDiv) {
+        loadingDiv.setAttribute("aria-hidden", "true");
+        loadingDiv.style.display = "none";
+      }
+      if (btn) btn.disabled = false;
+
       if (data.status === "success") {
-        estPrice.innerHTML =
-          "<h2>🏠 Estimated Price: <span class='success'>₹" +
-          data.estimated_price +
-          " Lakh</span></h2>" +
-          "<p>For " + sqft + " sqft, " + bhk + " BHK, " + bathrooms + " bath in " + location + "</p>";
+        showResult(data.estimated_price, sqft, data.input.bhk, data.input.bath, data.input.location);
+        addRecent({
+          sqft: sqft,
+          bhk: data.input.bhk,
+          bath: data.input.bath,
+          location: data.input.location,
+          price: data.estimated_price
+        });
       } else {
-        showError("Error: " + data.error);
+        showError(data.error || "Something went wrong.");
       }
     },
-    error: function(xhr, status, error) {
-      loadingDiv.style.display = "none";
-      console.error("API Error:", error);
-      
+    error: function (xhr, status, error) {
+      if (loadingDiv) {
+        loadingDiv.setAttribute("aria-hidden", "true");
+        loadingDiv.style.display = "none";
+      }
+      if (btn) btn.disabled = false;
       if (xhr.status === 0) {
-        showError("Cannot connect to server. Make sure the Flask server is running on port 5000.");
+        showError("Cannot connect to server. Make sure the app is running on port 5001.");
       } else {
-        showError("Error fetching price: " + error);
+        showError("Request failed: " + (error || xhr.statusText));
       }
     }
   });
 }
 
-// Show error message
-function showError(message) {
-  var errorDiv = document.getElementById("errorMessage");
-  errorDiv.innerHTML = message;
-  errorDiv.style.display = "block";
-}
-
-// Load locations on page load
+// ----- Load locations -----
 function onPageLoad() {
-  console.log("Document loaded");
-  var url = "http://127.0.0.1:5000/get_location_names";
-  
+  renderRecent();
+
   $.ajax({
-    url: url,
+    url: API_BASE + "/get_location_names",
     type: "GET",
-    success: function(data, status) {
-      console.log("Got locations:", data);
-      if (data && data.locations) {
-        var uiLocations = document.getElementById("uiLocations");
-        $('#uiLocations').empty();
-        $('#uiLocations').append(new Option("Choose a Location", "", true, true));
-        
-        // Sort locations alphabetically
-        var sortedLocations = data.locations.sort();
-        
-        for (var i = 0; i < sortedLocations.length; i++) {
-          var opt = new Option(sortedLocations[i], sortedLocations[i]);
-          $('#uiLocations').append(opt);
+    success: function (data) {
+      if (data && data.locations && data.locations.length) {
+        var select = document.getElementById("uiLocations");
+        var countNum = document.getElementById("locationCountNum");
+        if (countNum) countNum.textContent = data.locations.length;
+        if (select) {
+          $("#uiLocations").empty().append(new Option("Select area", "", true, true));
+          data.locations.sort();
+          data.locations.forEach(function (loc) {
+            $("#uiLocations").append(new Option(loc, loc));
+          });
         }
+        var statLoc = document.getElementById("statLocations");
+        if (statLoc) statLoc.textContent = data.locations.length + "+";
       }
     },
-    error: function(xhr, status, error) {
-      console.error("Error loading locations:", error);
-      showError("Failed to load locations. Make sure the server is running.");
-      
-      // Add some sample locations as fallback
-      var uiLocations = document.getElementById("uiLocations");
-      $('#uiLocations').empty();
-      $('#uiLocations').append(new Option("Choose a Location", "", true, true));
-      
-      var sampleLocations = [
-        "1st phase jp nagar", "2nd phase judicial layout", "btm layout", 
-        "hsr layout", "whitefield", "indira nagar", "koramangala"
-      ];
-      
-      for (var i = 0; i < sampleLocations.length; i++) {
-        var opt = new Option(sampleLocations[i], sampleLocations[i]);
-        $('#uiLocations').append(opt);
+    error: function () {
+      var select = document.getElementById("uiLocations");
+      if (select) {
+        $("#uiLocations").empty().append(new Option("Select area", "", true, true));
+        ["1st phase jp nagar", "2nd phase judicial layout", "btm layout", "hsr layout", "whitefield", "indira nagar", "koramangala"].forEach(function (loc) {
+          $("#uiLocations").append(new Option(loc, loc));
+        });
       }
+      showError("Locations loaded from fallback. Is the server running on port 5001?");
     }
   });
 }

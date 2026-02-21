@@ -31,4 +31,34 @@ Frontend: HTML, CSS, JavaScript
 
 🎯 Outcome:
 An end-to-end ML pipeline and deployed web application that predicts house prices in Bangalore with an easy-to-use interface.
+
+---
+
+## 🚀 Run locally
+
+**Flask (dashboard):**
+```bash
+pip install -r requirements.txt
+python server/server.py
+```
+Then open http://localhost:5001
+
+**Streamlit:**
+```bash
+pip install -r requirements.txt
+streamlit run streamlit_app.py
+```
+Then open the URL shown in the terminal (e.g. http://localhost:8501).
+
+---
+
+## ☁️ Deploy with Streamlit (Streamlit Community Cloud)
+
+1. Push this repo to GitHub (already done if you cloned from GitHub).
+2. Go to [share.streamlit.io](https://share.streamlit.io).
+3. Sign in with GitHub and click **New app**.
+4. Select your repo: `arjavjain310/Real-Estate-Price-Prediction`.
+5. Set **Main file path** to: `streamlit_app.py`.
+6. Click **Deploy**. Your app will be live at a URL like `https://your-app-name.streamlit.app`.
+
 <img width="917" height="612" alt="Real Estate Price Prediction" src="https://github.com/user-attachments/assets/e9b25af8-0d06-4e55-b903-ea19b9542aeb" />
