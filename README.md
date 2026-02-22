@@ -52,13 +52,14 @@ Then open the URL shown in the terminal (e.g. http://localhost:8501).
 
 ---
 
-## ☁️ Deploy with Streamlit (Streamlit Community Cloud)
+## ☁️ Deploy with Streamlit (anyone with link can open)
 
-1. Push this repo to GitHub (already done if you cloned from GitHub).
-2. Go to [share.streamlit.io](https://share.streamlit.io).
-3. Sign in with GitHub and click **New app**.
-4. Select your repo: `arjavjain310/Real-Estate-Price-Prediction`.
-5. Set **Main file path** to: `streamlit_app.py`.
-6. Click **Deploy**. Your app will be live at a URL like `https://your-app-name.streamlit.app`.
+1. **Repo must be Public:** GitHub → `arjavjain310/Real-Estate-Price-Prediction` → Settings → change to **Public** if needed.
+2. Go to **[share.streamlit.io](https://share.streamlit.io)** and sign in with **GitHub** (use the same account: **arjavjain310**).
+3. Click **New app** → "Yup, I have an app."
+4. Set **Repository:** `arjavjain310/Real-Estate-Price-Prediction`, **Branch:** `main`, **Main file path:** `streamlit_app.py`.
+5. (Optional) Set a **Custom subdomain** (e.g. `real-estate-price-prediction`) for a shorter URL.
+6. Click **Deploy**. When the build finishes, your app URL will be like `https://....streamlit.app` — **share that link; anyone with it can open the app** (no login).
+7. If you see "Not found" or "You do not have access": use the `*.streamlit.app` URL from the deploy page (not `share.streamlit.io/errors/...`), and ensure you signed in with **github.com/arjavjain310**. See **DEPLOY.md** for full steps.
 
 <img width="917" height="612" alt="Real Estate Price Prediction" src="https://github.com/user-attachments/assets/e9b25af8-0d06-4e55-b903-ea19b9542aeb" />
